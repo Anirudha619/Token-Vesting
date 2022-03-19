@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Vesting</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+	<style>
+	button:hover {
+  background-color: #4CAF50; /* Green */
+  color: white;
+
+}
+
+    p{
+		font-weight: bold;
+		color: white;
+	}
+	h1{
+		color: white;
+	}
+	table {color: white;}
+	table, th, td {
+		border: 1px solid white;
+	}
+	</style>
+</head>
+<body style="background-color:#1d1d1d;">
+   <div> 
+	
+	   <div style="background-color:#008b2e;" ><h1 style="text-align:center;"  >Token Vesting</h1></div>
+       extra &nbsp;&nbsp;
+	   
+	</div>
+	<p id = 'Token' style="text-align:center;"  >Token Name : XYZ Token</p>
+	<p id = 'locked' style="text-align:center;"  ></p>
+	<p id = 'duration' style="text-align:center;"  >Total Duration : 12 Months</p>
+	<p id = 'Claimed' style="text-align:center;"  ></p>
+	   <div style="text-align:center;" >
+		
+	   <button id = "release" type="button" class="btn btn-success" >Release Token</button></div>
+   </div>
+   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
+   
+   <script  >
+	   
+       var contract;
+	   var token_address = "0x033fD27Db96a9D6F5BdB03899d483eb20cB509fC";
+      $(document).ready(function(){
+		  
+          web3 = new Web3(web3.currentProvider);
+          var address ="0xd3cd5fa9FEddf969cFEdfE1Ad7864049131e6e9F";
+		  var abi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC20Released",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			}
+		],
+		"name": "release",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "beneficiaryAddress",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint64",
+				"name": "startTimestamp",
+				"type": "uint64"
+			},
+			{
+				"internalType": "uint64",
+				"name": "durationSeconds",
+				"type": "uint64"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_total_beneficiary",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_vesting_time",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint64",
+				"name": "timestamp",
+				"type": "uint64"
+			}
+		],
+		"name": "vestedAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "_beneficiary",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "beneficiary_bal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "duration",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getNow",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			}
+		],
+		"name": "released",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "start",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "token_locked",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+          contract =new web3.eth.Contract(abi,address);
+          
+          contract.methods.token_locked(token_address,1).call().then(function(balance){
+              $('#locked').html(`Token locked: ${web3.utils.fromWei(balance,"ether")} Token `);
+          })
+
+          contract.methods.beneficiary_bal(token_address,1).call().then(function(balance){
+			  $('#Claimed').html(`Each Beneficiary Claimed : ${balance} Token`)
+           })
+		  
+		  
+      })
+
+	  
+	  $('#release').click(function(){
+		  var amt = 0 ;
+		  amt = parseInt($('#amount').val());
+		  web3.eth.getAccounts().then(function(accounts){
+			  var acc = accounts[0];
+			  return contract.methods.release(token_address).send({from: acc});
+		  }).then(function(tx){
+			  console.log(tx);
+		  }).catch(function(tx){
+			  console.log(tx);
+		  })
+
+		
+
+	  });
+    </script> 
+
+	
+
+</body>
+</html>
